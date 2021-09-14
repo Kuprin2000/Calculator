@@ -5,48 +5,49 @@
 #include <time.h>
 #include <string.h>
 
-//элемент двусвязного списка
+// element of a list
 typedef struct list
 {
 	char data[10];
-	list* prev;
-	list* next;
+	list *prev;
+	list *next;
 } list;
 
-//узел дерева
+// node of a tree
 typedef struct node
 {
 	char data[10];
-	node* left;
-	node* right;
+	node *left;
+	node *right;
 } node;
 
-//функция, определяюцая приоритет операци
+// get priority of the operation
 int priority(char input)
 {
 	switch (input)
 	{
 	case '+':
-	case '-': return 1;
+	case '-':
+		return 1;
 	case '*':
-	case '/': return 2;
+	case '/':
+		return 2;
 	}
 
 	return 100;
 }
 
-//рекурсивная функция создания дерева на основе массива токенов
-node* makeTree(char tokens[][10], int first, int last)
+// creates tree based on array of tokens
+node *makeTree(char tokens[][10], int first, int last)
 {
 	char buffer;
 	int minimum_priority = 100;
-	int  bracket_counter = 0;
+	int bracket_counter = 0;
 	int the_lowest_priority_token = 0;
 	int current_priority;
-	node* tree = new node;
+	node *tree = new node;
 
-	//если массив токенов состоит только из одного элемента, то создаем 
-	//концевой узел
+	// if the array consists of only one element
 	if (first == last)
 	{
 		strcpy_s(tree->data, 10, tokens[first]);
@@ -55,8 +56,8 @@ node* makeTree(char tokens[][10], int first, int last)
 		return tree;
 	}
 
-	//если же массив токенов состоит из большего, чем единица числа строк,
-	//то шагаем по массиву токенов и ищем токен с минимальным приоритетом
+	// if the array consists of more then one elemest,
+	// we look for token with the lowest priority
 	for (int i = first; i <= last; i++)
 	{
 		buffer = tokens[i][0];
@@ -86,24 +87,22 @@ node* makeTree(char tokens[][10], int first, int last)
 		}
 	}
 
-	//если первый и последний токены это скобки и между ними нет математических операторов, 
-	//то избавимся от этих скобок
+	// if the first and the last tokens are brackets we delete them
 	if (minimum_priority == 100 && tokens[first][0] == '(' && tokens[last][0] == ')')
 	{
 		return makeTree(tokens, first + 1, last - 1);
 	}
 
-	//записываем информацию в узел дерева и делаем рекурсивные вызовы
+	// create new node of the tree and make recursive calls
 	strcpy_s(tree->data, 10, tokens[the_lowest_priority_token]);
 	tree->left = makeTree(tokens, first, the_lowest_priority_token - 1);
 	tree->right = makeTree(tokens, the_lowest_priority_token + 1, last);
 
-	//возвращаем узел дерева
 	return tree;
 }
 
-//вывод на печать прямого обхода дерева
-void preOrderPrint(node * root)
+// pre-order traversal of the tree
+void preOrderPrint(node *root)
 {
 	if (root != nullptr)
 	{
@@ -118,8 +117,8 @@ void preOrderPrint(node * root)
 	}
 }
 
-//вывод на печать симметричного обхода дерева
-void inOrderPrint(node * root)
+// in-order traversal of the tree
+void inOrderPrint(node *root)
 {
 	if (root != nullptr)
 	{
@@ -134,8 +133,8 @@ void inOrderPrint(node * root)
 	}
 }
 
-//вывод на печать обратного обхода дерева
-void postOrderPrint(node * root)
+// post-order traversal of the tree
+void postOrderPrint(node *root)
 {
 	if (root != nullptr)
 	{
@@ -150,8 +149,8 @@ void postOrderPrint(node * root)
 	}
 }
 
-//получить обратную польскую запись на основе дерева
-void poland(node * root, char result[][10], int* counter)
+// get reverse polish notation of the tree
+void poland(node *root, char result[][10], int *counter)
 {
 	if (root != nullptr)
 	{
@@ -167,18 +166,18 @@ void poland(node * root, char result[][10], int* counter)
 	}
 }
 
-//очистка память из под дерева
-void deleteTree(node * root)
+// delete tree
+void deleteTree(node *root)
 {
 	if (root != nullptr)
 	{
 		deleteTree(root->left);
 		deleteTree(root->right);
-		delete root;
+		free(root);
 	}
 }
 
-//функция, проверяющая выражение на простейшие опечатки
+// check if there is no errors in the user input
 bool inputIsCorrect(char user_input[])
 {
 	if (strstr(user_input, "/0") != nullptr)
@@ -194,8 +193,8 @@ bool inputIsCorrect(char user_input[])
 	return true;
 }
 
-//функция, выполняющая разбор выражения на токены и проверку количества открывающих и закрывающих скобок
-bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
+// parse user input, get tokens and check if brackets are correct
+bool getTokens(char user_input[], char tokens[][10], int *tokens_counter)
 {
 	int name_length = 0;
 	int number_lenght = 0;
@@ -206,15 +205,16 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 	bool is_math_symbol_flag = true;
 	bool token_is_processed_flag = false;
 
-	//разбор выражения на токены
+	// parse tokens
 	for (int i = 0; i < strlen(user_input); i++)
 	{
 		token_is_processed_flag = false;
 
-		//если текущий символ - одна из математических операций
+		// if it is mathematical operation
 		if (user_input[i] == '+' || user_input[i] == '-' || user_input[i] == '*' || user_input[i] == '/' || user_input[i] == '(' || user_input[i] == ')')
 		{
-			if (i != 0) * tokens_counter += 1;
+			if (i != 0)
+				*tokens_counter += 1;
 
 			is_math_symbol_flag = true;
 			is_name_flag = false;
@@ -222,8 +222,10 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 			name_length = 0;
 			number_lenght = 0;
 
-			if (user_input[i] == '(') bracket_counter++;
-			if (user_input[i] == ')') bracket_counter--;
+			if (user_input[i] == '(')
+				bracket_counter++;
+			if (user_input[i] == ')')
+				bracket_counter--;
 
 			tokens[*tokens_counter][0] = user_input[i];
 			tokens[*tokens_counter][1] = '\0';
@@ -231,17 +233,19 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 			token_is_processed_flag = true;
 		}
 
-		//если текущий символ - часть имени переменной
+		// if it is a name of variable
 		if (user_input[i] >= 'a' && user_input[i] <= 'z')
 		{
-			if (is_name_flag == 0) * tokens_counter += 1;
+			if (is_name_flag == 0)
+				*tokens_counter += 1;
 
 			is_name_flag = true;
 			is_number_flag = false;
 			is_math_symbol_flag = false;
 			number_lenght = 0;
 
-			if (is_number_flag != 0) * tokens_counter += 1;
+			if (is_number_flag != 0)
+				*tokens_counter += 1;
 
 			tokens[*tokens_counter][name_length] = user_input[i];
 			tokens[*tokens_counter][name_length + 1] = '\0';
@@ -251,10 +255,11 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 			token_is_processed_flag = true;
 		}
 
-		//если текущий символ - цифра
+		// if it is a digit
 		if (user_input[i] >= '0' && user_input[i] <= '9')
 		{
-			if (is_number_flag == 0) * tokens_counter += 1;
+			if (is_number_flag == 0)
+				*tokens_counter += 1;
 
 			is_number_flag = true;
 			is_name_flag = false;
@@ -269,14 +274,14 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 			token_is_processed_flag = true;
 		}
 
-		//если текущий символ не относится ни к одной из категорий
+		// if it is an unknown symbol
 		if (token_is_processed_flag == 0)
 		{
 			return false;
 		}
 	}
 
-	//если не совпадает количество открывающих и закрывающих скобок
+	// if the number brackets is incorrect
 	if (bracket_counter != false)
 	{
 		return false;
@@ -285,8 +290,8 @@ bool getTokens(char user_input[], char tokens[][10], int* tokens_counter)
 	return true;
 }
 
-//функция, отвечающая за присвоение значений переменным
-void defineVariables(char tokens[][10], char variable_names[][10], char variable_values[][10], int* tokens_counter)
+// define values of variables
+void defineVariables(char tokens[][10], char variable_names[][10], char variable_values[][10], int *tokens_counter)
 {
 	bool variable_is_found_flag = false;
 	int current_variable_value;
@@ -294,26 +299,26 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 
 	for (int i = 0; i < *tokens_counter; i++)
 	{
-		//если очередной токен это имя переменной
+		// if current token is a variable name
 		if (tokens[i][0] >= 'a' && tokens[i][0] <= 'z')
 		{
 			variable_is_found_flag = false;
 
-			//проверяем, не ввел ли уже пользователь значение этой переменной
+			// check if user has already defined value
 			for (int j = 0; j < 50; j++)
 			{
-				//если да
+				// if user has already defined
 				if (strcmp(variable_names[j], tokens[i]) == 0)
 				{
 					current_variable_value = atoi(variable_values[j]);
 
-					//если значение переменной неотрицательное, то просто перезаписываем токен
+					// if value is positive
 					if (current_variable_value >= 0)
 					{
 						_itoa_s(current_variable_value, tokens[i], 10, 10);
 					}
 
-					//а иначе всталяем значение этой переменной в массив токенов в виде (-...)
+					// if value is negative, we paste it as (-...)
 					else
 					{
 						current_variable_value *= -1;
@@ -340,32 +345,30 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 				}
 			}
 
-			//если же пользователь еще не вводил значение этой переменной
+			// if user has not already defined
 			if (variable_is_found_flag == false)
 			{
-				printf("\nОпределим значение переменной %s (вводите 0, чтобы сгенерировать случайное число от 0 до 100): ", tokens[i]);
-
-				//то либо оставляем ее какой она есть
+				printf("\nDefine variable value %s (you can input 0 to generate random unumber from 0 to 100): ", tokens[i]);
 				scanf_s("%d", &variable_value_input);
 
-				//либо генерируем случайное число
+				// if value is 0, generate a random number
 				if (variable_value_input == 0)
 				{
 					variable_value_input = rand() % 100;
-					printf("Переменной присвоено значение %d \n", variable_value_input);
+					printf("\nGenerated value %d \n", variable_value_input);
 				}
 
-				//записываем имя и значение переменной в соотвествующие массивы
+				// write name of the variable and the value to the arrays
 				strcpy_s(variable_names[i], 10, tokens[i]);
 				_itoa_s(variable_value_input, variable_values[i], 10, 10);
 
-				//если значение переменной неотрицательное, то просто перезаписываем токен
+				// if the value is positive
 				if (variable_value_input >= 0)
 				{
 					_itoa_s(variable_value_input, tokens[i], 10, 10);
 				}
 
-				//а иначе всталяем значение этой переменной в массив токенов в виде (-...)
+				// if value is negative, we paste it as (-...)
 				else
 				{
 					variable_value_input *= -1;
@@ -396,12 +399,12 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 	}
 }
 
-//функция, преобразовывающая выражение, если в нем присутствуют унарные операции + и -
-void unaryOperationsConvertions(char tokens[][10], int* tokens_counter)
+// transforms expression for unary operations to work properly
+void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
 {
 	for (int k = 0; k < *tokens_counter; k++)
 	{
-		//если первым символом в выражении стоит минус
+		// unary -
 		if (tokens[k][0] == '-' && k == 0)
 		{
 			for (int i = *tokens_counter; i > 0; i--)
@@ -411,16 +414,16 @@ void unaryOperationsConvertions(char tokens[][10], int* tokens_counter)
 					tokens[i][j] = tokens[i - 1][j];
 				}
 			}
-			
+
 			tokens[0][0] = '0';
 			tokens[0][1] = '\0';
 			tokens[1][0] = '-';
 			tokens[1][1] = '\0';
-			
+
 			*tokens_counter += 1;
 		}
 
-		//если первым символом в выражении стоит плюс
+		// unary +
 		if (tokens[k][0] == '+' && k == 0)
 		{
 			for (int i = *tokens_counter; i > 0; i--)
@@ -430,16 +433,16 @@ void unaryOperationsConvertions(char tokens[][10], int* tokens_counter)
 					tokens[i][j] = tokens[i - 1][j];
 				}
 			}
-			
+
 			tokens[0][0] = '0';
 			tokens[0][1] = '\0';
 			tokens[1][0] = '+';
 			tokens[1][1] = '\0';
-			
+
 			*tokens_counter += 1;
 		}
 
-		//если первым символом в какой-то из скобок стоит минус
+		// unary - after bracket
 		if (tokens[k][0] == '-' && k != 0 && tokens[k - 1][0] == '(')
 		{
 			for (int i = *tokens_counter + k; i > k; i--)
@@ -449,16 +452,16 @@ void unaryOperationsConvertions(char tokens[][10], int* tokens_counter)
 					tokens[i][j] = tokens[i - 1][j];
 				}
 			}
-			
+
 			tokens[k][0] = '0';
 			tokens[k][1] = '\0';
 			tokens[k + 1][0] = '-';
 			tokens[k + 1][1] = '\0';
-			
+
 			*tokens_counter += 1;
 		}
 
-		//если первым символом в какой-то из скобок стоит плюс
+		// unary + after bracket
 		if (tokens[k][0] == '+' && k != 0 && tokens[k - 1][0] == '(')
 		{
 			for (int i = *tokens_counter + k; i > k; i--)
@@ -468,19 +471,19 @@ void unaryOperationsConvertions(char tokens[][10], int* tokens_counter)
 					tokens[i][j] = tokens[i - 1][j];
 				}
 			}
-			
+
 			tokens[k][0] = '0';
 			tokens[k][1] = '\0';
 			tokens[k + 1][0] = '+';
 			tokens[k + 1][1] = '\0';
-			
+
 			*tokens_counter += 1;
 		}
 	}
 }
 
-//функция, высчисляющая выражение с использованием стека
-int calculate(list * head, char tokens[][10], int tokens_counter)
+// caclulation of the expression using stack
+int calculate(list *head, char tokens[][10], int tokens_counter)
 {
 	int first_operand, second_operand, result;
 	char current_token[10];
@@ -489,27 +492,26 @@ int calculate(list * head, char tokens[][10], int tokens_counter)
 	{
 		strcpy_s(current_token, 10, tokens[i]);
 
-		//если очередной токен это число, то просто записываем его в стек
+		// if current token is a digit
 		if (current_token[0] >= '0' && current_token[0] < '9')
 		{
-			list* add = new list;
+			list *add = new list;
 			strcpy_s(add->data, 10, current_token);
 			add->prev = nullptr;
 			add->next = head;
 			head = add;
 		}
 
-		//если же очередной токен это математический оператор, то берем из стека два
-		//верхних элемента, выполняем необходимое действие и кладем результат на вершину стека
+		// if current token is a math operator
 		if (current_token[0] == '+')
 		{
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
 			head = head->next;
-			delete head->prev;
+			free(head->prev);
 			head->prev = nullptr;
-			
+
 			_itoa_s(first_operand + second_operand, head->data, 10, 10);
 		}
 		if (current_token[0] == '-')
@@ -518,9 +520,9 @@ int calculate(list * head, char tokens[][10], int tokens_counter)
 			second_operand = atoi(head->data);
 
 			head = head->next;
-			delete head->prev;
+			free(head->prev);
 			head->prev = nullptr;
-			
+
 			_itoa_s(first_operand - second_operand, head->data, 10, 10);
 		}
 		if (current_token[0] == '*')
@@ -529,9 +531,9 @@ int calculate(list * head, char tokens[][10], int tokens_counter)
 			second_operand = atoi(head->data);
 
 			head = head->next;
-			delete head->prev;
+			free(head->prev);
 			head->prev = nullptr;
-			
+
 			_itoa_s(first_operand * second_operand, head->data, 10, 10);
 		}
 		if (current_token[0] == '/')
@@ -539,16 +541,16 @@ int calculate(list * head, char tokens[][10], int tokens_counter)
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
-			//если произошло деление на ноль
+			// zero division
 			if (second_operand == 0)
 			{
 				return INT_MIN;
 			}
 
 			head = head->next;
-			delete head->prev;
+			free(head->prev);
 			head->prev = nullptr;
-			
+
 			_itoa_s(first_operand / second_operand, head->data, 10, 10);
 		}
 	}
@@ -562,110 +564,110 @@ int main()
 	setlocale(0, "russian");
 
 	char user_input[50], tokens[50][10], variable_names[50][10], variable_values[50][10];
-	int  tokens_counter = 0;
+	int tokens_counter = 0;
 	int tree_nodes_counter = 0;
 	int result;
 
-	node* tree;
-	list* head;
+	node *tree;
+	list *head;
 
-	//пользователь вводит выражение
-	printf("КАЛЬКУЛЯТОР\n\nПоддерживаются только целые числа, операции +, -, *, / и скобки.\nМожно также использовать переменные с названиями, написанными латиницей.\n");
-	printf("В этом случае после ввода выражения программа запросит у вас значения этих переменных.\nВыражение вводится слитно и в одну строку, и не должно быть длинее 50 символов.\n\n");
-	printf("Введите выражение: ");
+	// user inputs an expression
+	printf("Calculator\n\nYou can use whole numbers, operations +, -, *, \ and brackets. You can also use variables. For example a+b/2-5.\n");
+	printf("The program will ask you to input values of these variables later. Your expression should not\ncontan ' ' and should not be longer than 50 characters.\n\n");
+	printf("Input your expression: ");
 
 	gets_s(user_input, 50);
 
-	//проверка выражения на простейшие опечатки
+	// check if the expression is correct
 	if (!inputIsCorrect(user_input))
 	{
-		printf("\nПроизошло деление на ноль либо выражение содержит опечатку");
+		printf("Zero division or input is incorrect\n");
 		_getch();
 		return 0;
 	}
 
-	//разбор выражения на токены и проверка количества открывающих и закрывающих скобок
+	// get tokens from the expression and check number of brackets
 	if (!getTokens(user_input, tokens, &tokens_counter))
 	{
-		printf("\nВыражение содержит недопустимый символ, либо не совпадает количество открывающих и закрывающих скобок");
+		printf("\nYour expression is incorrect or number of brackets is incorrect");
 		_getch();
 		return 0;
 	}
 
 	tokens_counter++;
 
-	//очистим массив имен переменных
+	// initialize veriable names array
 	for (int i = 0; i < 50; ++i)
 	{
 		variable_names[i][0] = '\0';
 	}
 
-	//определяем значения переменных
+	// define values if the variables
 	defineVariables(tokens, variable_names, variable_values, &tokens_counter);
 
-	//преобразование выражения, если в нем присутствуют унарные знаки + и -
+	// transforms expression for unary operations to work properly
 	unaryOperationsConvertions(tokens, &tokens_counter);
 
-	//выведем токены на печать
-	printf("\nРазобьем выражение на токены с учетом переменных и унарных минусов и получим:\n");
+	// print tokens
+	printf("\nTokens we got from the expression:\n");
 	for (int i = 0; i < tokens_counter; i++)
 	{
 		printf("%s ", tokens[i]);
 	}
 
-	//создадим дерево
-	printf("\n\nПостроим по токенам бинарное дерево, получим:");
+	// Create a tree
+	printf("\n\nLet's create a binary tree:");
 	tree = makeTree(tokens, 0, tokens_counter - 1);
 
-	//продемонстрируем различные обходы этого дерева
-	printf("\n1)прямой обход: ");
+	// Print different traversals of the tree
+	printf("\n1) pre-order print: ");
 	preOrderPrint(tree);
 
-	printf("\n2)симметричный обход: ");
+	printf("\n2) in-order print: ");
 	inOrderPrint(tree);
 
-	printf("\n3)обратный обход: ");
+	printf("\n3) past-order print: ");
 	postOrderPrint(tree);
 
-	//очищаем массив с токенами
+	// delete tokens array
 	for (int i = 0; i < tokens_counter; i++)
 	{
 		tokens[i][0] = '\0';
 	}
 
-	//записываем в массив, где были токены, обратную пользскую запись выражения
+	// get reverse polish notation of the tree
 	poland(tree, tokens, &tree_nodes_counter);
 	tokens_counter = tree_nodes_counter;
 
-	//выводим обратную польскую запись на печать
-	printf("\n\nПолучаем обратную польскую запись: ");
+	// print reverse polish notation of the tree
+	printf("\n\nReverse polish notation of the tree: ");
 	for (int i = 0; i < tokens_counter; i++)
 	{
 		printf("%s ", tokens[i]);
 	}
 
-	//создаем стек
+	// create stack
 	head = new list;
 	head->prev = nullptr;
 	head->next = nullptr;
 
-	//вычисляем выражение с использованием стека
+	// calculate the expression
 	result = calculate(head, tokens, tokens_counter);
 
 	if (result == INT_MIN)
 	{
-		printf("\n\n Произошло деление на ноль");
-		delete head;
+		printf("\n\nZero dividision");
+		free(head);
 		deleteTree(tree);
 		_getch();
 		return 0;
 	}
 
-	//вывод на печать результата
-	printf("\n\nРезультат: %d", result);
+	//Print the result
+	printf("\n\nResult: %d", result);
 
-	//очистка памяти
-	delete head;
+	//Free memory
+	free(head);
 	deleteTree(tree);
 
 	_getch();
