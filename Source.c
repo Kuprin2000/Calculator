@@ -6,171 +6,141 @@
 #include <string.h>
 
 // element of a list
-typedef struct list
-{
+typedef struct list {
 	char data[10];
-	list *prev;
-	list *next;
+	struct list* prev;
+	struct list* next;
 } list;
 
 // node of a tree
-typedef struct node
-{
+typedef struct node {
 	char data[10];
-	node *left;
-	node *right;
+	struct node* left;
+	struct node* right;
 } node;
 
 // get priority of the operation
-int priority(char input)
-{
-	switch (input)
-	{
+int priority(char input) {
+	switch (input) {
 	case '+':
-	case '-':
-		return 1;
+	case '-': return 1;
 	case '*':
-	case '/':
-		return 2;
+	case '/': return 2;
 	}
 
 	return 100;
 }
 
 // creates tree based on array of tokens
-node *makeTree(char tokens[][10], int first, int last)
-{
+node* makeTree(char tokens[][10], int first, int last) {
 	char buffer;
 	int minimum_priority = 100;
-	int bracket_counter = 0;
+	int  bracket_counter = 0;
 	int the_lowest_priority_token = 0;
 	int current_priority;
-	node *tree = new node;
+	node* tree_ptr = (node*)malloc(sizeof(node));
 
 	// if the array consists of only one element
-	if (first == last)
-	{
-		strcpy_s(tree->data, 10, tokens[first]);
-		tree->left = nullptr;
-		tree->right = nullptr;
-		return tree;
+	if (first == last) {
+		strcpy_s(tree_ptr->data, 10, tokens[first]);
+		tree_ptr->left = NULL;
+		tree_ptr->right = NULL;
+		return tree_ptr;
 	}
 
 	// if the array consists of more then one elemest,
 	// we look for token with the lowest priority
-	for (int i = first; i <= last; i++)
-	{
+	for (int i = first; i <= last; i++) {
 		buffer = tokens[i][0];
 
-		if (buffer == '(')
-		{
+		if (buffer == '(') {
 			bracket_counter++;
 			continue;
 		}
 
-		if (buffer == ')')
-		{
+		if (buffer == ')') {
 			bracket_counter--;
 			continue;
 		}
 
-		if (bracket_counter > 0)
-		{
+		if (bracket_counter > 0) {
 			continue;
 		}
 
 		current_priority = priority(buffer);
-		if (current_priority <= minimum_priority)
-		{
+		if (current_priority <= minimum_priority) {
 			minimum_priority = current_priority;
 			the_lowest_priority_token = i;
 		}
 	}
 
 	// if the first and the last tokens are brackets we delete them
-	if (minimum_priority == 100 && tokens[first][0] == '(' && tokens[last][0] == ')')
-	{
+	if (minimum_priority == 100 && tokens[first][0] == '(' && tokens[last][0] == ')') {
 		return makeTree(tokens, first + 1, last - 1);
 	}
 
 	// create new node of the tree and make recursive calls
-	strcpy_s(tree->data, 10, tokens[the_lowest_priority_token]);
-	tree->left = makeTree(tokens, first, the_lowest_priority_token - 1);
-	tree->right = makeTree(tokens, the_lowest_priority_token + 1, last);
+	strcpy_s(tree_ptr->data, 10, tokens[the_lowest_priority_token]);
+	tree_ptr->left = makeTree(tokens, first, the_lowest_priority_token - 1);
+	tree_ptr->right = makeTree(tokens, the_lowest_priority_token + 1, last);
 
-	return tree;
+	return tree_ptr;
 }
 
-// pre-order traversal of the tree
-void preOrderPrint(node *root)
-{
-	if (root != nullptr)
-	{
+// pre-order traversal of the tree 
+void preOrderPrint(node * root) {
+	if (root != NULL) {
 		printf(" %s", root->data);
 		preOrderPrint(root->left);
 		preOrderPrint(root->right);
 	}
 
 	else
-	{
 		printf(" ... ");
-	}
 }
 
 // in-order traversal of the tree
-void inOrderPrint(node *root)
+void inOrderPrint(node * root)
 {
-	if (root != nullptr)
-	{
+	if (root != NULL) {
 		inOrderPrint(root->left);
 		printf(" %s", root->data);
 		inOrderPrint(root->right);
 	}
 
 	else
-	{
 		printf(" ... ");
-	}
 }
 
 // post-order traversal of the tree
-void postOrderPrint(node *root)
-{
-	if (root != nullptr)
-	{
+void postOrderPrint(node * root) {
+	if (root != NULL) {
 		postOrderPrint(root->left);
 		postOrderPrint(root->right);
 		printf(" %s", root->data);
 	}
 
 	else
-	{
 		printf(" ... ");
-	}
 }
 
 // get reverse polish notation of the tree
-void poland(node *root, char result[][10], int *counter)
+void poland(node * root, char result[][10], int* counter)
 {
-	if (root != nullptr)
-	{
+	if (root != NULL) {
 		poland(root->left, result, counter);
 		poland(root->right, result, counter);
 
 		for (int i = 0; i < 10; i++)
-		{
 			result[*counter][i] = root->data[i];
-		}
 
 		*counter += 1;
 	}
 }
 
 // delete tree
-void deleteTree(node *root)
-{
-	if (root != nullptr)
-	{
+void deleteTree(node * root) {
+	if (root != NULL) {
 		deleteTree(root->left);
 		deleteTree(root->right);
 		free(root);
@@ -178,92 +148,77 @@ void deleteTree(node *root)
 }
 
 // check if there is no errors in the user input
-bool inputIsCorrect(char user_input[])
-{
-	if (strstr(user_input, "/0") != nullptr)
-	{
-		return false;
-	}
+char inputIsCorrect(char user_input[]) {
+	if (strstr(user_input, "/0") != NULL)
+		return 0;
 
-	if (strstr(user_input, "++") != nullptr || strstr(user_input, "--") != nullptr || strstr(user_input, "**") != nullptr || strstr(user_input, "//") != nullptr)
-	{
-		return false;
-	}
 
-	return true;
+	if (strstr(user_input, "++") != NULL || strstr(user_input, "--") != NULL || strstr(user_input, "**") != NULL || strstr(user_input, "//") != NULL)
+		return 0;
+
+	return 1;
 }
 
 // parse user input, get tokens and check if brackets are correct
-bool getTokens(char user_input[], char tokens[][10], int *tokens_counter)
-{
+char getTokens(char user_input[], char tokens[][10], int* tokens_counter) {
 	int name_length = 0;
 	int number_lenght = 0;
 	int bracket_counter = 0;
 
-	bool is_name_flag = true;
-	bool is_number_flag = true;
-	bool is_math_symbol_flag = true;
-	bool token_is_processed_flag = false;
+	char is_name_flag = 1;
+	char is_number_flag = 1;
+	char is_math_symbol_flag = 1;
+	char token_is_processed_flag = 0;
 
 	// parse tokens
-	for (int i = 0; i < strlen(user_input); i++)
-	{
-		token_is_processed_flag = false;
+	for (int i = 0; i < strlen(user_input); i++) {
+		token_is_processed_flag = 0;
 
 		// if it is mathematical operation
-		if (user_input[i] == '+' || user_input[i] == '-' || user_input[i] == '*' || user_input[i] == '/' || user_input[i] == '(' || user_input[i] == ')')
-		{
-			if (i != 0)
-				*tokens_counter += 1;
+		if (user_input[i] == '+' || user_input[i] == '-' || user_input[i] == '*' || user_input[i] == '/' || user_input[i] == '(' || user_input[i] == ')') {
+			if (i != 0) * tokens_counter += 1;
 
-			is_math_symbol_flag = true;
-			is_name_flag = false;
-			is_number_flag = false;
+			is_math_symbol_flag = 1;
+			is_name_flag = 0;
+			is_number_flag = 0;
 			name_length = 0;
 			number_lenght = 0;
 
-			if (user_input[i] == '(')
-				bracket_counter++;
-			if (user_input[i] == ')')
-				bracket_counter--;
+			if (user_input[i] == '(') bracket_counter++;
+			if (user_input[i] == ')') bracket_counter--;
 
 			tokens[*tokens_counter][0] = user_input[i];
 			tokens[*tokens_counter][1] = '\0';
 
-			token_is_processed_flag = true;
+			token_is_processed_flag = 1;
 		}
 
 		// if it is a name of variable
-		if (user_input[i] >= 'a' && user_input[i] <= 'z')
-		{
-			if (is_name_flag == 0)
-				*tokens_counter += 1;
+		if (user_input[i] >= 'a' && user_input[i] <= 'z') {
+			if (is_name_flag == 0) * tokens_counter += 1;
 
-			is_name_flag = true;
-			is_number_flag = false;
-			is_math_symbol_flag = false;
+			is_name_flag = 1;
+			is_number_flag = 0;
+			is_math_symbol_flag = 0;
 			number_lenght = 0;
 
-			if (is_number_flag != 0)
-				*tokens_counter += 1;
+			if (is_number_flag != 0) * tokens_counter += 1;
 
 			tokens[*tokens_counter][name_length] = user_input[i];
 			tokens[*tokens_counter][name_length + 1] = '\0';
 
 			name_length++;
 
-			token_is_processed_flag = true;
+			token_is_processed_flag = 1;
 		}
 
 		// if it is a digit
-		if (user_input[i] >= '0' && user_input[i] <= '9')
-		{
-			if (is_number_flag == 0)
-				*tokens_counter += 1;
+		if (user_input[i] >= '0' && user_input[i] <= '9') {
+			if (is_number_flag == 0) * tokens_counter += 1;
 
-			is_number_flag = true;
-			is_name_flag = false;
-			is_math_symbol_flag = false;
+			is_number_flag = 1;
+			is_name_flag = 0;
+			is_math_symbol_flag = 0;
 			name_length = 0;
 
 			tokens[*tokens_counter][number_lenght] = user_input[i];
@@ -271,63 +226,48 @@ bool getTokens(char user_input[], char tokens[][10], int *tokens_counter)
 
 			number_lenght++;
 
-			token_is_processed_flag = true;
+			token_is_processed_flag = 1;
 		}
 
 		// if it is an unknown symbol
 		if (token_is_processed_flag == 0)
-		{
-			return false;
-		}
+			return 0;
 	}
 
 	// if the number brackets is incorrect
-	if (bracket_counter != false)
-	{
-		return false;
-	}
+	if (bracket_counter != 0)
+		return 0;
 
-	return true;
+	return 1;
 }
 
 // define values of variables
-void defineVariables(char tokens[][10], char variable_names[][10], char variable_values[][10], int *tokens_counter)
-{
-	bool variable_is_found_flag = false;
+void defineVariables(char tokens[][10], char variable_names[][10], char variable_values[][10], int* tokens_counter) {
+	char variable_is_found_flag = 0;
 	int current_variable_value;
 	int variable_value_input = 0;
 
-	for (int i = 0; i < *tokens_counter; i++)
-	{
+	for (int i = 0; i < *tokens_counter; i++) {
 		// if current token is a variable name
-		if (tokens[i][0] >= 'a' && tokens[i][0] <= 'z')
-		{
-			variable_is_found_flag = false;
+		if (tokens[i][0] >= 'a' && tokens[i][0] <= 'z') {
+			variable_is_found_flag = 0;
 
 			// check if user has already defined value
-			for (int j = 0; j < 50; j++)
-			{
+			for (int j = 0; j < 50; j++) {
 				// if user has already defined
-				if (strcmp(variable_names[j], tokens[i]) == 0)
-				{
+				if (strcmp(variable_names[j], tokens[i]) == 0) {
 					current_variable_value = atoi(variable_values[j]);
 
 					// if value is positive
 					if (current_variable_value >= 0)
-					{
 						_itoa_s(current_variable_value, tokens[i], 10, 10);
-					}
 
 					// if value is negative, we paste it as (-...)
-					else
-					{
+					else {
 						current_variable_value *= -1;
-						for (int k = *tokens_counter + 4; k > i; k--)
-						{
+						for (int k = *tokens_counter + 4; k > i; k--) {
 							for (int m = 0; m < 10; m++)
-							{
 								tokens[k][m] = tokens[k - 4][m];
-							}
 						}
 						tokens[i][0] = '(';
 						tokens[i][1] = '\0';
@@ -341,19 +281,17 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 						*tokens_counter += 4;
 					}
 
-					variable_is_found_flag = true;
+					variable_is_found_flag = 1;
 				}
 			}
 
 			// if user has not already defined
-			if (variable_is_found_flag == false)
-			{
+			if (variable_is_found_flag == 0) {
 				printf("\nDefine variable value %s (you can input 0 to generate random unumber from 0 to 100): ", tokens[i]);
 				scanf_s("%d", &variable_value_input);
 
 				// if value is 0, generate a random number
-				if (variable_value_input == 0)
-				{
+				if (variable_value_input == 0) {
 					variable_value_input = rand() % 100;
 					printf("\nGenerated value %d \n", variable_value_input);
 				}
@@ -362,23 +300,17 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 				strcpy_s(variable_names[i], 10, tokens[i]);
 				_itoa_s(variable_value_input, variable_values[i], 10, 10);
 
-				// if the value is positive
+				// if the value is positive 
 				if (variable_value_input >= 0)
-				{
 					_itoa_s(variable_value_input, tokens[i], 10, 10);
-				}
 
 				// if value is negative, we paste it as (-...)
-				else
-				{
+				else {
 					variable_value_input *= -1;
 
-					for (int k = *tokens_counter + 4; k > i; k--)
-					{
+					for (int k = *tokens_counter + 4; k > i; k--) {
 						for (int m = 0; m < 10; m++)
-						{
 							tokens[k][m] = tokens[k - 4][m];
-						}
 					}
 
 					tokens[i][0] = '(';
@@ -400,19 +332,13 @@ void defineVariables(char tokens[][10], char variable_names[][10], char variable
 }
 
 // transforms expression for unary operations to work properly
-void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
-{
-	for (int k = 0; k < *tokens_counter; k++)
-	{
+void unaryOperationsConvertions(char tokens[][10], int* tokens_counter) {
+	for (int k = 0; k < *tokens_counter; k++) {
 		// unary -
-		if (tokens[k][0] == '-' && k == 0)
-		{
-			for (int i = *tokens_counter; i > 0; i--)
-			{
+		if (tokens[k][0] == '-' && k == 0) {
+			for (int i = *tokens_counter; i > 0; i--) {
 				for (int j = 0; j < 10; j++)
-				{
 					tokens[i][j] = tokens[i - 1][j];
-				}
 			}
 
 			tokens[0][0] = '0';
@@ -424,14 +350,10 @@ void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
 		}
 
 		// unary +
-		if (tokens[k][0] == '+' && k == 0)
-		{
-			for (int i = *tokens_counter; i > 0; i--)
-			{
+		if (tokens[k][0] == '+' && k == 0) {
+			for (int i = *tokens_counter; i > 0; i--) {
 				for (int j = 0; j < 10; j++)
-				{
 					tokens[i][j] = tokens[i - 1][j];
-				}
 			}
 
 			tokens[0][0] = '0';
@@ -443,14 +365,10 @@ void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
 		}
 
 		// unary - after bracket
-		if (tokens[k][0] == '-' && k != 0 && tokens[k - 1][0] == '(')
-		{
-			for (int i = *tokens_counter + k; i > k; i--)
-			{
+		if (tokens[k][0] == '-' && k != 0 && tokens[k - 1][0] == '(') {
+			for (int i = *tokens_counter + k; i > k; i--) {
 				for (int j = 0; j < 10; j++)
-				{
 					tokens[i][j] = tokens[i - 1][j];
-				}
 			}
 
 			tokens[k][0] = '0';
@@ -462,14 +380,10 @@ void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
 		}
 
 		// unary + after bracket
-		if (tokens[k][0] == '+' && k != 0 && tokens[k - 1][0] == '(')
-		{
-			for (int i = *tokens_counter + k; i > k; i--)
-			{
+		if (tokens[k][0] == '+' && k != 0 && tokens[k - 1][0] == '(') {
+			for (int i = *tokens_counter + k; i > k; i--) {
 				for (int j = 0; j < 10; j++)
-				{
 					tokens[i][j] = tokens[i - 1][j];
-				}
 			}
 
 			tokens[k][0] = '0';
@@ -483,73 +397,64 @@ void unaryOperationsConvertions(char tokens[][10], int *tokens_counter)
 }
 
 // caclulation of the expression using stack
-int calculate(list *head, char tokens[][10], int tokens_counter)
-{
+int calculate(list * head, char tokens[][10], int tokens_counter) {
 	int first_operand, second_operand, result;
 	char current_token[10];
 
-	for (int i = 0; i < tokens_counter; i++)
-	{
+	for (int i = 0; i < tokens_counter; i++) {
 		strcpy_s(current_token, 10, tokens[i]);
 
 		// if current token is a digit
-		if (current_token[0] >= '0' && current_token[0] < '9')
-		{
-			list *add = new list;
-			strcpy_s(add->data, 10, current_token);
-			add->prev = nullptr;
-			add->next = head;
-			head = add;
+		if (current_token[0] >= '0' && current_token[0] < '9') {
+			list* add_ptr = (list*)malloc(sizeof(list));
+			strcpy_s(add_ptr->data, 10, current_token);
+			add_ptr->prev = NULL;
+			add_ptr->next = head;
+			head = add_ptr;
 		}
 
 		// if current token is a math operator
-		if (current_token[0] == '+')
-		{
+		if (current_token[0] == '+') {
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
 			head = head->next;
 			free(head->prev);
-			head->prev = nullptr;
+			head->prev = NULL;
 
 			_itoa_s(first_operand + second_operand, head->data, 10, 10);
 		}
-		if (current_token[0] == '-')
-		{
+		if (current_token[0] == '-') {
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
 			head = head->next;
 			free(head->prev);
-			head->prev = nullptr;
+			head->prev = NULL;
 
 			_itoa_s(first_operand - second_operand, head->data, 10, 10);
 		}
-		if (current_token[0] == '*')
-		{
+		if (current_token[0] == '*') {
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
 			head = head->next;
 			free(head->prev);
-			head->prev = nullptr;
+			head->prev = NULL;
 
 			_itoa_s(first_operand * second_operand, head->data, 10, 10);
 		}
-		if (current_token[0] == '/')
-		{
+		if (current_token[0] == '/') {
 			first_operand = atoi(head->next->data);
 			second_operand = atoi(head->data);
 
 			// zero division
 			if (second_operand == 0)
-			{
 				return INT_MIN;
-			}
 
 			head = head->next;
 			free(head->prev);
-			head->prev = nullptr;
+			head->prev = NULL;
 
 			_itoa_s(first_operand / second_operand, head->data, 10, 10);
 		}
@@ -558,37 +463,35 @@ int calculate(list *head, char tokens[][10], int tokens_counter)
 	return atoi(head->data);
 }
 
-int main()
-{
+int main() {
 	srand(time(NULL));
 	setlocale(0, "russian");
 
 	char user_input[50], tokens[50][10], variable_names[50][10], variable_values[50][10];
-	int tokens_counter = 0;
+	int  tokens_counter = 0;
 	int tree_nodes_counter = 0;
 	int result;
 
-	node *tree;
-	list *head;
+
+	node* tree_ptr;
+	list* head_ptr;
 
 	// user inputs an expression
 	printf("Calculator\n\nYou can use whole numbers, operations +, -, *, \ and brackets. You can also use variables. For example a+b/2-5.\n");
-	printf("The program will ask you to input values of these variables later. Your expression should not\ncontan ' ' and should not be longer than 50 characters.\n\n");
+	printf("The program will ask you to input values of these variables later. Your expression should not contan ' ' and\nshould not be longer than 50 characters.\n\n");
 	printf("Input your expression: ");
 
 	gets_s(user_input, 50);
 
 	// check if the expression is correct
-	if (!inputIsCorrect(user_input))
-	{
+	if (!inputIsCorrect(user_input)) {
 		printf("Zero division or input is incorrect\n");
 		_getch();
 		return 0;
 	}
 
 	// get tokens from the expression and check number of brackets
-	if (!getTokens(user_input, tokens, &tokens_counter))
-	{
+	if (!getTokens(user_input, tokens, &tokens_counter)) {
 		printf("\nYour expression is incorrect or number of brackets is incorrect");
 		_getch();
 		return 0;
@@ -597,8 +500,7 @@ int main()
 	tokens_counter++;
 
 	// initialize veriable names array
-	for (int i = 0; i < 50; ++i)
-	{
+	for (int i = 0; i < 50; ++i) {
 		variable_names[i][0] = '\0';
 	}
 
@@ -610,55 +512,51 @@ int main()
 
 	// print tokens
 	printf("\nTokens we got from the expression:\n");
-	for (int i = 0; i < tokens_counter; i++)
-	{
+	for (int i = 0; i < tokens_counter; i++) {
 		printf("%s ", tokens[i]);
 	}
 
 	// Create a tree
 	printf("\n\nLet's create a binary tree:");
-	tree = makeTree(tokens, 0, tokens_counter - 1);
+	tree_ptr = makeTree(tokens, 0, tokens_counter - 1);
 
 	// Print different traversals of the tree
 	printf("\n1) pre-order print: ");
-	preOrderPrint(tree);
+	preOrderPrint(tree_ptr);
 
 	printf("\n2) in-order print: ");
-	inOrderPrint(tree);
+	inOrderPrint(tree_ptr);
 
 	printf("\n3) past-order print: ");
-	postOrderPrint(tree);
+	postOrderPrint(tree_ptr);
 
 	// delete tokens array
-	for (int i = 0; i < tokens_counter; i++)
-	{
+	for (int i = 0; i < tokens_counter; i++) {
 		tokens[i][0] = '\0';
 	}
 
 	// get reverse polish notation of the tree
-	poland(tree, tokens, &tree_nodes_counter);
+	poland(tree_ptr, tokens, &tree_nodes_counter);
 	tokens_counter = tree_nodes_counter;
 
 	// print reverse polish notation of the tree
 	printf("\n\nReverse polish notation of the tree: ");
-	for (int i = 0; i < tokens_counter; i++)
-	{
+	for (int i = 0; i < tokens_counter; i++) {
 		printf("%s ", tokens[i]);
 	}
 
 	// create stack
-	head = new list;
-	head->prev = nullptr;
-	head->next = nullptr;
+	head_ptr = (list*)malloc(sizeof(list));
+	head_ptr->prev = NULL;
+	head_ptr->next = NULL;
 
 	// calculate the expression
-	result = calculate(head, tokens, tokens_counter);
+	result = calculate(head_ptr, tokens, tokens_counter);
 
-	if (result == INT_MIN)
-	{
+	if (result == INT_MIN) {
 		printf("\n\nZero dividision");
-		free(head);
-		deleteTree(tree);
+		free(head_ptr);
+		deleteTree(tree_ptr);
 		_getch();
 		return 0;
 	}
@@ -667,8 +565,8 @@ int main()
 	printf("\n\nResult: %d", result);
 
 	//Free memory
-	free(head);
-	deleteTree(tree);
+	free(head_ptr);
+	deleteTree(tree_ptr);
 
 	_getch();
 	return 0;
